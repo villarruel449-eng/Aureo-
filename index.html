@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AUREO — Pedidos</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #D4AF37;
+    --gold-light: #F2D472;
+    --gold-dark: #A8882A;
+    --bg: #0A0A0A;
+    --bg2: #111111;
+    --bg3: #181818;
+    --surface: #141414;
+    --border: rgba(212,175,55,0.18);
+    --text: #F0EAD6;
+    --text-dim: #8A7A5A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Montserrat', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* FONDO TEXTURIZADO */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212,175,55,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 90% 90%, rgba(212,175,55,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 6px;
+    color: var(--text);
+  }
+
+  .logo span {
+    color: var(--gold);
+  }
+
+  .logo-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 10px;
+    font-style: italic;
+    letter-spacing: 4px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    display: block;
+    text-align: center;
+    margin-top: -4px;
+  }
+
+  /* TOTAL BADGE */
+  .total-badge {
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-light));
+    color: #0A0A0A;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(212,175,55,0.3);
+    white-space: nowrap;
+  }
+
+  .total-badge.pulse {
+    animation: goldpulse 0.4s ease;
+  }
+
+  @keyframes goldpulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.12); box-shadow: 0 6px 30px rgba(212,175,55,0.6); }
+    100% { transform: scale(1); }
+  }
+
+  /* CONTENIDO */
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 24px 20px 120px;
+  }
+
+  /* CAMPOS */
+  .fields-section {
+    margin-bottom: 28px;
+  }
+
+  .field-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .gold-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    padding: 14px 16px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    margin-bottom: 14px;
+  }
+
+  .gold-input::placeholder { color: var(--text-dim); }
+
+  .gold-input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(212,175,55,0.08), inset 0 0 20px rgba(212,175,55,0.03);
+  }
+
+  /* DIVISOR */
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0 14px;
+  }
+
+  .section-title span {
+    font-size: 9px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .section-title::before,
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+
+  /* GRILLA DE PRODUCTOS */
+  .products-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .product-card {
+    position: relative;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 14px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    overflow: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+    active-transform: scale(0.97);
+  }
+
+  .product-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(212,175,55,0.07), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .product-card:active {
+    transform: scale(0.96);
+  }
+
+  .product-card:hover::before,
+  .product-card:active::before {
+    opacity: 1;
+  }
+
+  .product-card .accent-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .product-card .emoji {
+    font-size: 28px;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .product-card .name {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .product-card .price {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  .product-card .badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--gold);
+    color: #0A0A0A;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .product-card.has-items .badge {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* RESUMEN */
+  .summary-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    min-height: 60px;
+    display: none;
+  }
+
+  .summary-box.visible { display: block; }
+
+  .summary-title {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-dim);
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    animation: fadeInUp 0.3s ease;
+  }
+
+  .summary-item:last-child { border-bottom: none; }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .summary-item .item-qty {
+    color: var(--gold);
+    font-weight: 600;
+    margin-right: 6px;
+  }
+
+  .btn-clear {
+    background: none;
+    border: 1px solid rgba(255,80,80,0.3);
+    color: rgba(255,100,100,0.7);
+    padding: 8px 14px;
+    border-radius: 4px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.2s;
+  }
+
+  .btn-clear:hover {
+    background: rgba(255,80,80,0.08);
+    border-color: rgba(255,80,80,0.5);
+    color: rgba(255,120,120,0.9);
+  }
+
+  /* BOTÓN ENVIAR */
+  .btn-send {
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold-dark) 0%, var(--gold) 50%, var(--gold-light) 100%);
+    color: #0A0A0A;
+    border: none;
+    border-radius: 6px;
+    padding: 18px;
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+    box-shadow: 0 8px 32px rgba(212,175,55,0.25);
+  }
+
+  .btn-send::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .btn-send:hover::after, .btn-send:active::after { opacity: 1; }
+  .btn-send:active { transform: scale(0.99); }
+
+  .btn-send:disabled {
+    background: #2a2a2a;
+    color: #555;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--bg3);
+    border: 1px solid var(--gold);
+    color: var(--text);
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    z-index: 999;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 8px 40px rgba(212,175,55,0.2);
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* FOOTER LINE */
+  .footer-line {
+    text-align: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">AURE<span>O</span></div>
+    <div class="logo-sub">Delivery Premium</div>
+  </div>
+  <div class="total-badge" id="totalBadge">$0</div>
+</header>
+
+<main>
+
+  <!-- DATOS DEL CLIENTE -->
+  <div class="fields-section">
+    <div class="field-label">Cliente</div>
+    <input class="gold-input" id="nombre" type="text" placeholder="Nombre completo" autocomplete="off">
+    <div class="field-label">Dirección de entrega</div>
+    <input class="gold-input" id="direccion" type="text" placeholder="Calle, número, piso..." autocomplete="off">
+  </div>
+
+  <!-- COMIDAS -->
+  <div class="section-title"><span>Comidas</span></div>
+  <div class="products-grid">
+    <div class="product-card" onclick="sumar('Burger', 15000, this)">
+      <div class="accent-bar" style="background: linear-gradient(90deg,#2d5a27,#4a8f3f)"></div>
+      <span class="emoji">🍔</span>
+      <div class="name">Burger</div>
+      <div class="price">$15.000</div>
+      <div class="badge" id="badge-Burger">0</div>
+    </div>
+    <div class="product-card" onclick="sumar('Pizza', 10000, this)">
+      <div class="accent-bar" style="background: linear-gradient(90deg,#b33,#e84040)"></div>
+      <span class="emoji">🍕</span>
+      <div class="name">Pizza</div>
+      <div class="price">$10.000</div>
+      <div class="badge" id="badge-Pizza">0</div>
+    </div>
+    <div class="product-card" onclick="sumar('Donuts', 8000, this)">
+      <div class="accent-bar" style="background: linear-gradient(90deg,#c44,#e06080)"></div>
+      <span class="emoji">🍩</span>
+      <div class="name">Donuts</div>
+      <div class="price">$8.000</div>
+      <div class="badge" id="badge-Donuts">0</div>
+    </div>
+    <div class="product-card" onclick="sumar('Papas Fritas', 5000, this)">
+      <div class="accent-bar" style="background: linear-gradient(90deg,#c8a000,var(--gold))"></div>
+      <span class="emoji">🍟</span>
+      <div class="name">Papas Fritas</div>
+      <div class="price">$5.000</div>
+      <div class="badge" id="badge-Papas Fritas">0</div>
+    </div>
+  </div>
+
+  <!-- BEBIDAS -->
+  <div class="section-title"><span>Bebidas</span></div>
+  <div class="products-grid">
+    <div class="product-card" onclick="sumar('Coca Cola', 4000, this)">
+      <div class="accent-bar" style="background: linear-gradient(90deg,#990000,#cc1111)"></div>
+      <span class="emoji">🥤</span>
+      <div class="name">Coca Cola</div>
+      <div class="price">$4.000</div>
+      <div class="badge" id="badge-Coca Cola">0</div>
+    </div>
+    <div class="product-card" onclick="sumar('Fanta', 4000, this)">
+      <div class="accent-bar" style="background: linear-gradient(90deg,#cc6600,#ff8c00)"></div>
+      <span class="emoji">🍊</span>
+      <div class="name">Fanta</div>
+      <div class="price">$4.000</div>
+      <div class="badge" id="badge-Fanta">0</div>
+    </div>
+    <div class="product-card" onclick="sumar('Lima Limón', 4000, this)">
+      <div class="accent-bar" style="background: linear-gradient(90deg,#7db800,#aaee00)"></div>
+      <span class="emoji">🍋</span>
+      <div class="name">Lima Limón</div>
+      <div class="price">$4.000</div>
+      <div class="badge" id="badge-Lima Limón">0</div>
+    </div>
+    <div class="product-card" onclick="sumar('Café', 5000, this)">
+      <div class="accent-bar" style="background: linear-gradient(90deg,#3d1f0d,#6b3a1f)"></div>
+      <span class="emoji">☕</span>
+      <div class="name">Café</div>
+      <div class="price">$5.000</div>
+      <div class="badge" id="badge-Café">0</div>
+    </div>
+  </div>
+
+  <!-- RESUMEN -->
+  <div class="section-title"><span>Tu pedido</span></div>
+  <div class="summary-box" id="summaryBox">
+    <div class="summary-title">Resumen</div>
+    <div id="summaryItems"></div>
+    <button class="btn-clear" onclick="limpiarPedido()">✕ Vaciar pedido</button>
+  </div>
+
+  <!-- ENVIAR -->
+  <button class="btn-send" id="btnEnviar" onclick="enviarTicket()">
+    Enviar por WhatsApp
+  </button>
+
+  <div class="footer-line">AUREO — Calidad que se siente</div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let lista = {};
+  let total = 0;
+
+  function formatPrice(n) {
+    return '$' + n.toLocaleString('es-AR');
+  }
+
+  function sumar(item, precio, card) {
+    lista[item] = (lista[item] || 0) + 1;
+    total += precio;
+    actualizarUI(item, card);
+    mostrarToast('✦ ' + item + ' añadido');
+  }
+
+  function actualizarUI(item, card) {
+    // Badge en card
+    const badge = document.getElementById('badge-' + item);
+    if (badge) {
+      badge.textContent = lista[item];
+      card.classList.add('has-items');
+      badge.style.animation = 'none';
+      badge.offsetHeight;
+      badge.style.animation = '';
+    }
+
+    // Total badge header
+    const totalBadge = document.getElementById('totalBadge');
+    totalBadge.textContent = formatPrice(total);
+    totalBadge.classList.remove('pulse');
+    void totalBadge.offsetWidth;
+    totalBadge.classList.add('pulse');
+
+    // Resumen
+    actualizarResumen();
+  }
+
+  function actualizarResumen() {
+    const box = document.getElementById('summaryBox');
+    const items = document.getElementById('summaryItems');
+
+    if (Object.keys(lista).length === 0) {
+      box.classList.remove('visible');
+      return;
+    }
+
+    box.classList.add('visible');
+    items.innerHTML = '';
+
+    for (const [nombre, qty] of Object.entries(lista)) {
+      const div = document.createElement('div');
+      div.className = 'summary-item';
+      div.innerHTML = `<span><span class="item-qty">${qty}x</span>${nombre}</span>`;
+      items.appendChild(div);
+    }
+
+    // Total final en resumen
+    const totalDiv = document.createElement('div');
+    totalDiv.className = 'summary-item';
+    totalDiv.style.cssText = 'font-weight:600; color:#F0EAD6; margin-top:8px; padding-top:8px; border-top: 1px solid rgba(212,175,55,0.2); border-bottom:none;';
+    totalDiv.innerHTML = `<span style="letter-spacing:2px;font-size:10px;text-transform:uppercase">TOTAL</span><span style="color:var(--gold);font-family:Playfair Display,serif;font-size:16px;">${formatPrice(total)}</span>`;
+    items.appendChild(totalDiv);
+  }
+
+  function limpiarPedido() {
+    lista = {};
+    total = 0;
+
+    // Limpiar badges
+    document.querySelectorAll('.product-card').forEach(c => c.classList.remove('has-items'));
+    document.querySelectorAll('.badge').forEach(b => b.textContent = '0');
+
+    document.getElementById('totalBadge').textContent = '$0';
+    document.getElementById('summaryBox').classList.remove('visible');
+    mostrarToast('Pedido vaciado');
+  }
+
+  function enviarTicket() {
+    const nombre = document.getElementById('nombre').value.trim();
+    const direccion = document.getElementById('direccion').value.trim();
+
+    if (!nombre) { mostrarToast('⚠ Ingresá tu nombre'); return; }
+    if (!direccion) { mostrarToast('⚠ Ingresá la dirección'); return; }
+    if (total === 0) { mostrarToast('⚠ Seleccioná al menos un producto'); return; }
+
+    let resumen = '';
+    for (const [item, qty] of Object.entries(lista)) {
+      resumen += `• ${qty}x ${item}\n`;
+    }
+
+    const ticket =
+      `✨ *AUREO — TICKET DIGITAL* ✨\n` +
+      `👤 *Cliente:* ${nombre.toUpperCase()}\n` +
+      `📍 *Dirección:* ${direccion.toUpperCase()}\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      resumen +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `💰 *TOTAL: ${formatPrice(total)}*\n` +
+      `Pedido desde App AUREO 📲`;
+
+    const url = `https://wa.me/5491125554845?text=${encodeURIComponent(ticket)}`;
+    window.open(url, '_blank');
+  }
+
+  function mostrarToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+</script>
+</body>
+</html>
