@@ -8,14 +8,15 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icono-192.png",
-      "sizes": "192x192",
+      "src": "1780170227930.png",
+      "sizes": "512x512",
       "type": "image/png"
     },
     {
-      "src": "icono-512.png",
-      "sizes": "512x512",
+      "src": "1780170227930.png",
+      "sizes": "192x192",
       "type": "image/png"
     }
-  ]
+  ],
+  "description": "AUREO – Delivery Premium. Disfrutá de nuestra variedad de burgers, pizzas y donuts con la máxima calidad directo a tu casa."
 }
