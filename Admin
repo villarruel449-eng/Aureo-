@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AUREO — Panel Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #D4AF37;
+    --gold-light: #F2D472;
+    --gold-dark: #A8882A;
+    --bg: #0A0A0A;
+    --bg3: #181818;
+    --surface: #141414;
+    --border: rgba(212,175,55,0.18);
+    --text: #F0EAD6;
+    --text-dim: #8A7A5A;
+    --green: #4CAF50;
+    --yellow: #FFC107;
+    --red: #F44336;
+    --blue: #2196F3;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { background:var(--bg); color:var(--text); font-family:'Montserrat',sans-serif; min-height:100vh; }
+  #loginScreen {
+    position:fixed; inset:0; background:var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    z-index:999; flex-direction:column; gap:20px;
+  }
+  .login-box {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; padding:40px 32px; width:90%; max-width:360px; text-align:center;
+  }
+  .login-logo { font-family:'Playfair Display',serif; font-size:36px; font-weight:900; letter-spacing:6px; }
+  .login-logo span { color:var(--gold); }
+  .login-sub { font-size:9px; letter-spacing:4px; color:var(--text-dim); text-transform:uppercase; margin-bottom:28px; margin-top:4px; }
+  .login-input {
+    width:100%; background:var(--bg3); border:1px solid var(--border);
+    border-radius:6px; color:var(--text); padding:14px 16px;
+    font-family:'Montserrat',sans-serif; font-size:14px; outline:none;
+    margin-bottom:12px; transition:border-color 0.3s;
+  }
+  .login-input:focus { border-color:var(--gold); }
+  .login-input::placeholder { color:var(--text-dim); }
+  .login-btn {
+    width:100%; background:linear-gradient(135deg,var(--gold-dark),var(--gold),var(--gold-light));
+    color:#0A0A0A; border:none; border-radius:6px; padding:16px;
+    font-family:'Playfair Display',serif; font-size:15px; font-weight:700;
+    letter-spacing:3px; cursor:pointer; margin-top:6px;
+  }
+  .login-error { color:var(--red); font-size:11px; margin-top:8px; display:none; }
+  header {
+    position:sticky; top:0; z-index:100;
+    background:rgba(10,10,10,0.95); backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border);
+    padding:14px 20px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .logo { font-family:'Playfair Display',serif; font-size:22px; font-weight:900; letter-spacing:5px; }
+  .logo span { color:var(--gold); }
+  .admin-badge { background:var(--gold); color:#0A0A0A; padding:4px 12px; border-radius:20px; font-size:9px; font-weight:700; letter-spacing:2px; }
+  .logout-btn { background:none; border:1px solid rgba(255,80,80,0.3); color:rgba(255,100,100,0.7); padding:6px 12px; border-radius:4px; font-size:10px; cursor:pointer; }
+  main { max-width:600px; margin:0 auto; padding:20px 16px 100px; }
+  .stats-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:20px; }
+  .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; text-align:center; }
+  .stat-value { font-family:'Playfair Display',serif; font-size:28px; font-weight:700; color:var(--gold); }
+  .stat-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim); margin-top:4px; }
+  .section-title { display:flex; align-items:center; gap:12px; margin:20px 0 12px; }
+  .section-title span { font-size:9px; letter-spacing:4px; text-transform:uppercase; color:var(--gold); font-weight:600; white-space:nowrap; }
+  .section-title::before,.section-title::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); }
+  .pedido-card { background:var(--bg3); border:1px solid var(--border); border-radius:8px; margin-bottom:10px; overflow:hidden; animation:fadeIn 0.4s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .pedido-header { display:flex; justify-content:space-between; align-items:center; padding:14px 16px; cursor:pointer; }
+  .pedido-num { font-size:9px; letter-spacing:2px; color:var(--text-dim); }
+  .pedido-nombre { font-size:14px; font-weight:600; color:var(--text); margin-top:2px; }
+  .pedido-hora { font-size:10px; color:var(--text-dim); }
+  .estado-badge { padding:5px 12px; border-radius:20px; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; white-space:nowrap; }
+  .estado-nuevo { background:rgba(33,150,243,0.15); color:var(--blue); border:1px solid rgba(33,150,243,0.3); }
+  .estado-preparando { background:rgba(255,193,7,0.15); color:var(--yellow); border:1px solid rgba(255,193,7,0.3); }
+  .estado-entregado { background:rgba(76,175,80,0.15); color:var(--green); border:1px solid rgba(76,175,80,0.3); }
+  .estado-cancelado { background:rgba(244,67,54,0.15); color:var(--red); border:1px solid rgba(244,67,54,0.3); }
+  .pedido-body { padding:0 16px 16px; display:none; }
+  .pedido-body.open { display:block; }
+  .pedido-info-row { display:flex; justify-content:space-between; font-size:12px; color:var(--text-dim); padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+  .pedido-info-row:last-child { border-bottom:none; }
+  .pedido-info-row span:last-child { color:var(--text); font-weight:600; }
+  .pedido-item { display:flex; justify-content:space-between; font-size:12px; padding:4px 0; color:var(--text-dim); }
+  .pedido-item span:first-child { color:var(--gold); font-weight:600; }
+  .pedido-total { display:flex; justify-content:space-between; font-family:'Playfair Display',serif; font-size:16px; color:var(--gold); font-weight:700; padding-top:10px; border-top:1px solid var(--border); }
+  .estado-btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .estado-btn { flex:1; min-width:80px; padding:8px 4px; border:none; border-radius:4px; font-family:'Montserrat',sans-serif; font-size:10px; font-weight:600; letter-spacing:1px; cursor:pointer; }
+  .btn-nuevo { background:rgba(33,150,243,0.2); color:var(--blue); border:1px solid rgba(33,150,243,0.4); }
+  .btn-preparando { background:rgba(255,193,7,0.2); color:var(--yellow); border:1px solid rgba(255,193,7,0.4); }
+  .btn-entregado { background:rgba(76,175,80,0.2); color:var(--green); border:1px solid rgba(76,175,80,0.4); }
+  .btn-cancelado { background:rgba(244,67,54,0.2); color:var(--red); border:1px solid rgba(244,67,54,0.4); }
+  .filtros { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .filtro-btn { padding:6px 14px; border-radius:20px; font-size:10px; font-weight:600; letter-spacing:1px; cursor:pointer; border:1px solid var(--border); background:var(--surface); color:var(--text-dim); }
+  .filtro-btn.active { background:var(--gold); color:#0A0A0A; border-color:var(--gold); }
+  .empty { text-align:center; padding:40px 20px; color:var(--text-dim); font-size:13px; }
+  .nuevo-pedido-btn { position:fixed; bottom:20px; right:20px; background:linear-gradient(135deg,var(--gold-dark),var(--gold)); color:#0A0A0A; border:none; border-radius:50px; padding:14px 20px; font-family:'Playfair Display',serif; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 4px 20px rgba(212,175,55,0.4); z-index:50; }
+  .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--bg3); border:1px solid var(--gold); color:var(--text); padding:10px 20px; border-radius:30px; font-size:12px; z-index:999; transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1); white-space:nowrap; }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">AURE<span>O</span></div>
+    <div class="login-sub">Panel Administrador</div>
+    <input class="login-input" id="loginUser" type="text" placeholder="Usuario" autocomplete="off">
+    <input class="login-input" id="loginPass" type="password" placeholder="Contraseña">
+    <button class="login-btn" onclick="login()">INGRESAR</button>
+    <div class="login-error" id="loginError">Usuario o contraseña incorrectos</div>
+  </div>
+</div>
+
+<div id="panel" style="display:none">
+  <header>
+    <div class="logo">AURE<span>O</span></div>
+    <div class="admin-badge">ADMIN</div>
+    <button class="logout-btn" onclick="logout()">Salir</button>
+  </header>
+  <main>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Pedidos hoy</div></div>
+      <div class="stat-card"><div class="stat-value" id="statFacturacion">$0</div><div class="stat-label">Facturación</div></div>
+      <div class="stat-card"><div class="stat-value" id="statPendientes">0</div><div class="stat-label">Pendientes</div></div>
+      <div class="stat-card"><div class="stat-value" id="statEntregados">0</div><div class="stat-label">Entregados</div></div>
+    </div>
+    <div class="section-title"><span>Pedidos</span></div>
+    <div class="filtros">
+      <button class="filtro-btn active" onclick="filtrar('todos',this)">Todos</button>
+      <button class="filtro-btn" onclick="filtrar('nuevo',this)">Nuevos</button>
+      <button class="filtro-btn" onclick="filtrar('preparando',this)">Preparando</button>
+      <button class="filtro-btn" onclick="filtrar('entregado',this)">Entregados</button>
+      <button class="filtro-btn" onclick="filtrar('cancelado',this)">Cancelados</button>
+    </div>
+    <div id="pedidosList"></div>
+  </main>
+  <button class="nuevo-pedido-btn" onclick="abrirNuevoPedido()">+ Nuevo pedido manual</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const USUARIO='aureo', PASSWORD='admin2026';
+let pedidos=JSON.parse(localStorage.getItem('aureo_pedidos')||'[]');
+let filtroActual='todos';
+
+function login(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value.trim();
+  if(u===USUARIO&&p===PASSWORD){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('panel').style.display='block';
+    cargarPedidos();
+  } else {
+    document.getElementById('loginError').style.display='block';
+  }
+}
+
+function logout(){
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('panel').style.display='none';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+}
+
+document.addEventListener('keydown',e=>{ if(e.key==='Enter') login(); });
+
+function guardar(){ localStorage.setItem('aureo_pedidos',JSON.stringify(pedidos)); }
+function formatPrice(n){ return '$'+n.toLocaleString('es-AR'); }
+function formatHora(ts){ return new Date(ts).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}); }
+function formatFecha(ts){ return new Date(ts).toLocaleDateString('es-AR'); }
+function estadoLabel(e){ return {nuevo:'Nuevo',preparando:'Preparando',entregado:'Entregado',cancelado:'Cancelado'}[e]||e; }
+
+function actualizarStats(){
+  const hoy=new Date().toDateString();
+  const ph=pedidos.filter(p=>new Date(p.timestamp).toDateString()===hoy);
+  document.getElementById('statTotal').textContent=ph.length;
+  document.getElementById('statFacturacion').textContent=formatPrice(ph.reduce((s,p)=>s+p.total,0));
+  document.getElementById('statPendientes').textContent=ph.filter(p=>p.estado==='nuevo'||p.estado==='preparando').length;
+  document.getElementById('statEntregados').textContent=ph.filter(p=>p.estado==='entregado').length;
+}
+
+function cargarPedidos(){
+  actualizarStats();
+  const lista=document.getElementById('pedidosList');
+  const filtrados=filtroActual==='todos'?[...pedidos].reverse():[...pedidos].filter(p=>p.estado===filtroActual).reverse();
+  if(filtrados.length===0){ lista.innerHTML='<div class="empty">No hay pedidos aún</div>'; return; }
+  lista.innerHTML=filtrados.map(p=>`
+    <div class="pedido-card">
+      <div class="pedido-header" onclick="togglePedido('${p.id}')">
+        <div>
+          <div class="pedido-num">#${p.id.slice(-4).toUpperCase()} · ${formatFecha(p.timestamp)}</div>
+          <div class="pedido-nombre">${p.nombre}</div>
+          <div class="pedido-hora">${formatHora(p.timestamp)}</div>
+        </div>
+        <div class="estado-badge estado-${p.estado}">${estadoLabel(p.estado)}</div>
+      </div>
+      <div class="pedido-body" id="body-${p.id}">
+        <div class="pedido-info-row"><span>Cliente</span><span>${p.nombre}</span></div>
+        <div class="pedido-info-row"><span>Dirección</span><span>${p.direccion}</span></div>
+        <div style="margin:10px 0">
+          ${Object.entries(p.items).map(([item,qty])=>`<div class="pedido-item"><span>${qty}x</span><span>${item}</span></div>`).join('')}
+        </div>
+        <div class="pedido-total"><span>Total</span><span>${formatPrice(p.total)}</span></div>
+        <div class="estado-btns">
+          <button class="estado-btn btn-nuevo" onclick="cambiarEstado('${p.id}','nuevo')">Nuevo</button>
+          <button class="estado-btn btn-preparando" onclick="cambiarEstado('${p.id}','preparando')">Preparando</button>
+          <button class="estado-btn btn-entregado" onclick="cambiarEstado('${p.id}','entregado')">Entregado</button>
+          <button class="estado-btn btn-cancelado" onclick="cambiarEstado('${p.id}','cancelado')">Cancelar</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function togglePedido(id){
+  document.getElementById('body-'+id).classList.toggle('open');
+}
+
+function cambiarEstado(id,estado){
+  const p=pedidos.find(p=>p.id===id);
+  if(p){ p.estado=estado; guardar(); cargarPedidos(); mostrarToast('Estado: '+estadoLabel(estado)); }
+}
+
+function filtrar(f,btn){
+  filtroActual=f;
+  document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  cargarPedidos();
+}
+
+function abrirNuevoPedido(){
+  const nombre=prompt('Nombre del cliente:'); if(!nombre) return;
+  const direccion=prompt('Dirección:'); if(!direccion) return;
+  const detalle=prompt('Productos (ej: 2x Burger, 1x Coca Cola):'); if(!detalle) return;
+  const total=parseInt(prompt('Total:')||'0');
+  const items={};
+  detalle.split(',').forEach(d=>{ const m=d.trim().match(/(\d+)x?\s+(.+)/i); if(m) items[m[2].trim()]=parseInt(m[1]); });
+  pedidos.push({id:Date.now().toString(),nombre:nombre.toUpperCase(),direccion:direccion.toUpperCase(),items,total,estado:'nuevo',timestamp:Date.now()});
+  guardar(); cargarPedidos(); mostrarToast('✦ Pedido agregado');
+}
+
+function mostrarToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._timer); t._timer=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+if(pedidos.length===0){
+  pedidos=[
+    {id:Date.now()-3600000+'',nombre:'JUAN PÉREZ',direccion:'AV. RIVADAVIA 1234',items:{'Burger':2,'Coca Cola':2},total:38000,estado:'entregado',timestamp:Date.now()-3600000},
+    {id:Date.now()-1800000+'',nombre:'MARÍA GARCÍA',direccion:'CALLE FALSA 456',items:{'Pizza':1,'Fanta':1},total:22000,estado:'preparando',timestamp:Date.now()-1800000},
+    {id:Date.now()-600000+'',nombre:'CARLOS LÓPEZ',direccion:'BELGRANO 789',items:{'Burger':1,'Café':1},total:20000,estado:'nuevo',timestamp:Date.now()-600000}
+  ];
+  guardar();
+}
+</script>
+</body>
+</html>
