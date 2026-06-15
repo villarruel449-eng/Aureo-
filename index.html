@@ -577,7 +577,11 @@
     mostrarToast('⚠ Seleccioná al menos un producto');
     return;
   }
+
+  // Obtener pedidos existentes
   let pedidos = JSON.parse(localStorage.getItem('aureo_pedidos')) || [];
+
+  // Crear pedido
   const nuevoPedido = {
     id: Date.now().toString(),
     nombre: nombre.toUpperCase(),
@@ -587,12 +591,18 @@
     estado: 'nuevo',
     timestamp: Date.now()
   };
+
+  // Guardar pedido
   pedidos.push(nuevoPedido);
   localStorage.setItem('aureo_pedidos', JSON.stringify(pedidos));
+
+  // Generar mensaje WhatsApp
   let resumen = '';
+
   for (const [item, qty] of Object.entries(lista)) {
     resumen += `• ${qty}x ${item}\n`;
   }
+
   const ticket =
 `✨ *AUREO — TICKET DIGITAL* ✨
 👤 *Cliente:* ${nombre.toUpperCase()}
@@ -606,17 +616,24 @@ Pedido desde App AUREO 📲`;
     `https://wa.me/5491125554845?text=${encodeURIComponent(ticket)}`,
     '_blank'
   );
+
+  // Limpiar formulario
   lista = {};
   total = 0;
+
   document.getElementById('nombre').value = '';
   document.getElementById('direccion').value = '';
+
   document.querySelectorAll('.product-card').forEach(c =>
     c.classList.remove('has-items')
   );
+
   document.querySelectorAll('.badge').forEach(b =>
     b.textContent = '0'
   );
+
   document.getElementById('totalBadge').textContent = '$0';
   document.getElementById('summaryBox').classList.remove('visible');
+
   mostrarToast('✦ Pedido enviado');
 }
