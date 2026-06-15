@@ -559,42 +559,64 @@
     document.getElementById('summaryBox').classList.remove('visible');
     mostrarToast('Pedido vaciado');
   }
-
   function enviarTicket() {
-    const nombre = document.getElementById('nombre').value.trim();
-    const direccion = document.getElementById('direccion').value.trim();
+  const nombre = document.getElementById('nombre').value.trim();
+  const direccion = document.getElementById('direccion').value.trim();
 
-    if (!nombre) { mostrarToast('⚠ Ingresá tu nombre'); return; }
-    if (!direccion) { mostrarToast('⚠ Ingresá la dirección'); return; }
-    if (total === 0) { mostrarToast('⚠ Seleccioná al menos un producto'); return; }
-
-    let resumen = '';
-    for (const [item, qty] of Object.entries(lista)) {
-      resumen += `• ${qty}x ${item}\n`;
-    }
-
-    const ticket =
-      `✨ *AUREO — TICKET DIGITAL* ✨\n` +
-      `👤 *Cliente:* ${nombre.toUpperCase()}\n` +
-      `📍 *Dirección:* ${direccion.toUpperCase()}\n` +
-      `━━━━━━━━━━━━━━━━━━\n` +
-      resumen +
-      `━━━━━━━━━━━━━━━━━━\n` +
-      `💰 *TOTAL: ${formatPrice(total)}*\n` +
-      `Pedido desde App AUREO 📲`;
-
-    const url = `https://wa.me/5491125554845?text=${encodeURIComponent(ticket)}`;
-    window.open(url, '_blank');
+  if (!nombre) {
+    mostrarToast('⚠ Ingresá tu nombre');
+    return;
   }
 
-  function mostrarToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(t._timer);
-    t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+  if (!direccion) {
+    mostrarToast('⚠ Ingresá la dirección');
+    return;
   }
-</script>
-</body>
-  </html>
-  
+
+  if (total === 0) {
+    mostrarToast('⚠ Seleccioná al menos un producto');
+    return;
+  }
+  let pedidos = JSON.parse(localStorage.getItem('aureo_pedidos')) || [];
+  const nuevoPedido = {
+    id: Date.now().toString(),
+    nombre: nombre.toUpperCase(),
+    direccion: direccion.toUpperCase(),
+    items: { ...lista },
+    total: total,
+    estado: 'nuevo',
+    timestamp: Date.now()
+  };
+  pedidos.push(nuevoPedido);
+  localStorage.setItem('aureo_pedidos', JSON.stringify(pedidos));
+  let resumen = '';
+  for (const [item, qty] of Object.entries(lista)) {
+    resumen += `• ${qty}x ${item}\n`;
+  }
+  const ticket =
+`✨ *AUREO — TICKET DIGITAL* ✨
+👤 *Cliente:* ${nombre.toUpperCase()}
+📍 *Dirección:* ${direccion.toUpperCase()}
+━━━━━━━━━━━━━━━━━━
+${resumen}━━━━━━━━━━━━━━━━━━
+💰 *TOTAL: ${formatPrice(total)}*
+Pedido desde App AUREO 📲`;
+
+  window.open(
+    `https://wa.me/5491125554845?text=${encodeURIComponent(ticket)}`,
+    '_blank'
+  );
+  lista = {};
+  total = 0;
+  document.getElementById('nombre').value = '';
+  document.getElementById('direccion').value = '';
+  document.querySelectorAll('.product-card').forEach(c =>
+    c.classList.remove('has-items')
+  );
+  document.querySelectorAll('.badge').forEach(b =>
+    b.textContent = '0'
+  );
+  document.getElementById('totalBadge').textContent = '$0';
+  document.getElementById('summaryBox').classList.remove('visible');
+  mostrarToast('✦ Pedido enviado');
+}
