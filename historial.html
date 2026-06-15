@@ -1,7 +1,3 @@
-<script>
-let pedidos = JSON.parse(localStorage.getItem('aureo_pedidos')) || [];
-let filtroEstado='todos';
-let filtroPeriodo='todos';
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -161,6 +157,9 @@ let filtroPeriodo='todos';
 </div>
 <div class="toast" id="toast"></div>
 <script>
+  let pedidos = JSON.parse(localStorage.getItem('aureo_pedidos')) || [];
+let filtroEstado='todos';
+let filtroPeriodo='todos';
 const USUARIO = 'aureo', PASSWORD = 'admin2026';
 window.onload = () => {
     if (localStorage.getItem('aureo_sesion') === 'activa') {
@@ -260,5 +259,4 @@ if(!localStorage.getItem('aureo_pedidos')){
 
 </script>
 </body>
-  </html>
-      
+</html>
