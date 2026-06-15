@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -150,6 +150,8 @@
 
 <script>
 const USUARIO = 'aureo', PASSWORD = 'admin2026';
+let pedidos = JSON.parse(localStorage.getItem('aureo_pedidos')) || [];
+let filtroActual='todos';
 
 window.onload = () => {
     if (localStorage.getItem('aureo_sesion') === 'activa') {
@@ -174,12 +176,7 @@ function logout(){
     localStorage.removeItem('aureo_sesion');
     location.reload();
   }
-function logout(){
-  document.getElementById('loginScreen').style.display='flex';
-  document.getElementById('panel').style.display='none';
-  document.getElementById('loginUser').value='';
-  document.getElementById('loginPass').value='';
-}
+
 
 document.addEventListener('keydown',e=>{ if(e.key==='Enter') login(); });
 
@@ -274,3 +271,4 @@ if(pedidos.length===0){
 </script>
 </body>
 </html>
+  
