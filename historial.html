@@ -188,7 +188,7 @@ function logout(){
 }
 </script>
 function aplicarFiltros(){
-  pedidos=JSON.parse(localStorage.getItem('aureo_pedidos')||'[]');
+  pedidos = JSON.parse(localStorage.getItem('aureo_pedidos')) || [];
   const buscar=document.getElementById('buscarCliente').value.toLowerCase();
   const montoMin=parseInt(document.getElementById('montoMin').value||'0');
   let filtrados=[...pedidos].reverse().filter(p=>{
