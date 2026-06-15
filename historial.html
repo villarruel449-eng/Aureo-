@@ -186,7 +186,6 @@ function logout(){
     localStorage.removeItem('aureo_sesion');
     location.reload();
 }
-</script>
 function aplicarFiltros(){
 pedidos = JSON.parse(localStorage.getItem('aureo_pedidos')) || [];
   const buscar=document.getElementById('buscarCliente').value.toLowerCase();
