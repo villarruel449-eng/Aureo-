@@ -149,22 +149,31 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const USUARIO='aureo', PASSWORD='admin2026';
-let pedidos=JSON.parse(localStorage.getItem('aureo_pedidos')||'[]');
-let filtroActual='todos';
+const USUARIO = 'aureo', PASSWORD = 'admin2026';
+
+window.onload = () => {
+    if (localStorage.getItem('aureo_sesion') === 'activa') {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('panel').style.display = 'block';
+        if (typeof cargarPedidos === 'function') cargarPedidos();
+    }
+};
 
 function login(){
-  const u=document.getElementById('loginUser').value.trim();
-  const p=document.getElementById('loginPass').value.trim();
-  if(u===USUARIO&&p===PASSWORD){
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('panel').style.display='block';
-    cargarPedidos();
-  } else {
-    document.getElementById('loginError').style.display='block';
-  }
+    const u = document.getElementById('loginUser').value.trim();
+    const p = document.getElementById('loginPass').value.trim();
+    if(u === USUARIO && p === PASSWORD){
+        localStorage.setItem('aureo_sesion', 'activa');
+        location.reload();
+    } else {
+        alert('Credenciales incorrectas');
+    }
 }
 
+function logout(){
+    localStorage.removeItem('aureo_sesion');
+    location.reload();
+  }
 function logout(){
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('panel').style.display='none';
