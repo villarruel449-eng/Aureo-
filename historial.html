@@ -90,7 +90,6 @@
     <a href="historial.html" style="color: #D4AF37; text-decoration: none; font-weight: bold; font-family: sans-serif;">HISTORIAL</a>
     <a href="franquicias.html" style="color: #D4AF37; text-decoration: none; font-weight: bold; font-family: sans-serif;">FRANQUICIAS</a>
 </nav>
-
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">AURE<span>O</span></div>
@@ -101,7 +100,6 @@
     <div class="login-error" id="loginError">Usuario o contraseña incorrectos</div>
   </div>
 </div>
-
 <div id="panel" style="display:none">
   <header>
     <div class="logo">AURE<span>O</span></div>
@@ -157,12 +155,9 @@
     <div id="historialList"></div>
   </main>
 </div>
-
 <div class="toast" id="toast"></div>
-
 <script>
 const USUARIO = 'aureo', PASSWORD = 'admin2026';
-
 window.onload = () => {
     if (localStorage.getItem('aureo_sesion') === 'activa') {
         document.getElementById('loginScreen').style.display = 'none';
@@ -170,7 +165,6 @@ window.onload = () => {
         if (typeof aplicarFiltros === 'function') aplicarFiltros();
     }
 };
-
 function login(){
     const u = document.getElementById('loginUser').value.trim();
     const p = document.getElementById('loginPass').value.trim();
@@ -181,7 +175,6 @@ function login(){
         alert('Credenciales incorrectas');
     }
 }
-
 function logout(){
     localStorage.removeItem('aureo_sesion');
     location.reload();
