@@ -161,46 +161,32 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const USUARIO='aureo',PASSWORD='admin2026';
-let pedidos=JSON.parse(localStorage.getItem('aureo_pedidos')||'[]');
-let filtroPeriodo='todos',filtroEstado='todos';
+const USUARIO = 'aureo', PASSWORD = 'admin2026';
+
+window.onload = () => {
+    if (localStorage.getItem('aureo_sesion') === 'activa') {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('panel').style.display = 'block';
+        if (typeof aplicarFiltros === 'function') aplicarFiltros();
+    }
+};
 
 function login(){
-  const u=document.getElementById('loginUser').value.trim();
-  const p=document.getElementById('loginPass').value.trim();
-  if(u===USUARIO&&p===PASSWORD){
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('panel').style.display='block';
-    aplicarFiltros();
-  } else { document.getElementById('loginError').style.display='block'; }
+    const u = document.getElementById('loginUser').value.trim();
+    const p = document.getElementById('loginPass').value.trim();
+    if(u === USUARIO && p === PASSWORD){
+        localStorage.setItem('aureo_sesion', 'activa');
+        location.reload();
+    } else {
+        alert('Credenciales incorrectas');
+    }
 }
+
 function logout(){
-  document.getElementById('loginScreen').style.display='flex';
-  document.getElementById('panel').style.display='none';
+    localStorage.removeItem('aureo_sesion');
+    location.reload();
 }
-document.addEventListener('keydown',e=>{ if(e.key==='Enter') login(); });
-function formatPrice(n){ return '$'+n.toLocaleString('es-AR'); }
-function formatFecha(ts){ return new Date(ts).toLocaleDateString('es-AR'); }
-function formatHora(ts){ return new Date(ts).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}); }
-function estadoLabel(e){ return {nuevo:'Nuevo',preparando:'Preparando',entregado:'Entregado',cancelado:'Cancelado'}[e]||e; }
-function setPeriodo(p,btn){ filtroPeriodo=p; document.querySelectorAll('.filtro-row:nth-child(2) .chip').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); aplicarFiltros(); }
-function setEstado(e,btn){ filtroEstado=e; document.querySelectorAll('.filtro-row:nth-child(3) .chip').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); aplicarFiltros(); }
-function limpiarFiltros(){
-  filtroPeriodo='todos'; filtroEstado='todos';
-  document.getElementById('buscarCliente').value='';
-  document.getElementById('montoMin').value='';
-  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
-  document.querySelectorAll('.filtro-row:nth-child(2) .chip:first-child,.filtro-row:nth-child(3) .chip:first-child').forEach(c=>c.classList.add('active'));
-  aplicarFiltros();
-}
-function filtrarPorPeriodo(p){
-  const ahora=new Date(),ts=new Date(p.timestamp);
-  if(filtroPeriodo==='hoy') return ts.toDateString()===ahora.toDateString();
-  if(filtroPeriodo==='ayer'){ const a=new Date(ahora); a.setDate(a.getDate()-1); return ts.toDateString()===a.toDateString(); }
-  if(filtroPeriodo==='semana'){ const s=new Date(ahora); s.setDate(s.getDate()-7); return ts>=s; }
-  if(filtroPeriodo==='mes'){ const m=new Date(ahora); m.setMonth(m.getMonth()-1); return ts>=m; }
-  return true;
-}
+</script>
 function aplicarFiltros(){
   pedidos=JSON.parse(localStorage.getItem('aureo_pedidos')||'[]');
   const buscar=document.getElementById('buscarCliente').value.toLowerCase();
