@@ -1,3 +1,7 @@
+<script>
+let pedidos = JSON.parse(localStorage.getItem('aureo_pedidos')) || [];
+let filtroEstado='todos';
+let filtroPeriodo='todos';
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -253,9 +257,8 @@ if(!localStorage.getItem('aureo_pedidos')){
   ];
   localStorage.setItem('aureo_pedidos', JSON.stringify(demo));
 }
-window.onload = () => {
-  aplicarFiltros();
-};
+
 </script>
 </body>
-</html>
+  </html>
+      
