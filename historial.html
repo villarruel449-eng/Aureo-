@@ -222,7 +222,7 @@ pedidos = JSON.parse(localStorage.getItem('aureo_pedidos')) || [];
     </div>`).join('');
 }
 function exportarCSV(){
-  pedidos=JSON.parse(localStorage.getItem('aureo_pedidos')||'[]');
+  
   const buscar=document.getElementById('buscarCliente').value.toLowerCase();
   const montoMin=parseInt(document.getElementById('montoMin').value||'0');
   let filtrados=[...pedidos].reverse().filter(p=>{
