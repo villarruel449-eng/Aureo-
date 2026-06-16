@@ -1,6 +1,9 @@
-const CACHE_NAME = 'aureo-cache-v1';
+const CACHE_NAME = 'aureo-cache-v2';
 const ASSETS = [
   'index.html',
+  'admin.html',
+  'historial.html',
+  'franquicias.html',
   'manifest.json',
   'icono-192.png',
   'icono-512.png'
