@@ -167,8 +167,7 @@ window.onload = () => {
   if(localStorage.getItem('aureo_sesion') === 'activa'){
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('panel').style.display='block';
-    aplicarFiltros();
-  }
+    aplicarFiltros();  
 };
 function login(){
     const u = document.getElementById('loginUser').value.trim();
