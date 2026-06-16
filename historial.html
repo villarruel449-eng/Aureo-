@@ -162,11 +162,14 @@ let filtroEstado='todos';
 let filtroPeriodo='todos';
 const USUARIO = 'aureo', PASSWORD = 'admin2026';
 window.onload = () => {
-    if (localStorage.getItem('aureo_sesion') === 'activa') {
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('panel').style.display = 'block';
-        if (typeof aplicarFiltros === 'function') aplicarFiltros();
-    }
+  pedidos = JSON.parse(localStorage.getItem('aureo_pedidos')) || [];
+
+  if(localStorage.getItem('aureo_sesion') === 'activa'){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('panel').style.display='block';
+    aplicarFiltros();
+  }
+};
 };
 function login(){
     const u = document.getElementById('loginUser').value.trim();
@@ -246,17 +249,51 @@ function mostrarToast(msg){
   t.textContent=msg; t.classList.add('show');
   clearTimeout(t._timer); t._timer=setTimeout(()=>t.classList.remove('show'),2500);
 }
-if(!localStorage.getItem('aureo_pedidos')){
-  const demo=[
-    {id:Date.now()-86400000+'',nombre:'JUAN PÉREZ',direccion:'AV. RIVADAVIA 1234',items:{'Burger':2,'Coca Cola':2},total:38000,estado:'entregado',timestamp:Date.now()-86400000},
-    {id:Date.now()-3600000+'',nombre:'MARÍA GARCÍA',direccion:'CALLE FALSA 456',items:{'Pizza':1,'Fanta':1},total:22000,estado:'entregado',timestamp:Date.now()-3600000},
-    {id:Date.now()-1800000+'',nombre:'CARLOS LÓPEZ',direccion:'BELGRANO 789',items:{'Burger':1,'Café':1},total:20000,estado:'preparando',timestamp:Date.now()-1800000},
-    {id:Date.now()-600000+'',nombre:'ANA MARTÍNEZ',direccion:'SAN MARTÍN 321',items:{'Donuts':3},total:24000,estado:'nuevo',timestamp:Date.now()-600000},
-    {id:Date.now()-7200000+'',nombre:'PEDRO DÍAZ',direccion:'MITRE 567',items:{'Pizza':2},total:20000,estado:'cancelado',timestamp:Date.now()-7200000}
-  ];
-  localStorage.setItem('aureo_pedidos', JSON.stringify(demo));
+function formatPrice(n){
+  return '$' + n.toLocaleString('es-AR');
 }
 
+function formatFecha(ts){
+  return new Date(ts).toLocaleDateString('es-AR');
+}
+
+function formatHora(ts){
+  return new Date(ts).toLocaleTimeString('es-AR',{
+    hour:'2-digit',
+    minute:'2-digit'
+  });
+}
+
+function estadoLabel(e){
+  return {
+    nuevo:'Nuevo',
+    preparando:'Preparando',
+    entregado:'Entregado',
+    cancelado:'Cancelado'
+  }[e] || e;
+}
+
+function filtrarPorPeriodo(){
+  return true;
+}
+
+function setPeriodo(periodo, boton){
+  filtroPeriodo = periodo;
+  aplicarFiltros();
+}
+
+function setEstado(estado, boton){
+  filtroEstado = estado;
+  aplicarFiltros();
+}
+
+function limpiarFiltros(){
+  document.getElementById('buscarCliente').value='';
+  document.getElementById('montoMin').value='';
+  filtroEstado='todos';
+  filtroPeriodo='todos';
+  aplicarFiltros();
+  }
 </script>
 </body>
 </html>
