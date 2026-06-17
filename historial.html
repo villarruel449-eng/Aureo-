@@ -90,6 +90,7 @@
     <a href="historial.html" style="color: #D4AF37; text-decoration: none; font-weight: bold; font-family: sans-serif;">HISTORIAL</a>
     <a href="franquicias.html" style="color: #D4AF37; text-decoration: none; font-weight: bold; font-family: sans-serif;">FRANQUICIAS</a>
 </nav>
+
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">AURE<span>O</span></div>
@@ -100,6 +101,7 @@
     <div class="login-error" id="loginError">Usuario o contraseña incorrectos</div>
   </div>
 </div>
+
 <div id="panel" style="display:none">
   <header>
     <div class="logo">AURE<span>O</span></div>
@@ -155,170 +157,160 @@
     <div id="historialList"></div>
   </main>
 </div>
+
 <div class="toast" id="toast"></div>
+
 <script>
   let pedidos = JSON.parse(localStorage.getItem('aureo_pedidos')) || [];
-let filtroEstado='todos';
-let filtroPeriodo='todos';
-const USUARIO = 'aureo', PASSWORD = 'admin2026';
-window.onload = () => {
-  pedidos = JSON.parse(localStorage.getItem('aureo_pedidos')) || [];
+  let filtroEstado = 'todos';
+  let filtroPeriodo = 'todos';
+  const USUARIO = 'aureo', PASSWORD = 'admin2026';
 
-  if(localStorage.getItem('aureo_sesion') === 'activa'){
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('panel').style.display='block';
-    aplicarFiltros();  
-  }
-};
-function login(){
-    const u = document.getElementById('loginUser').value.trim();
-    const p = document.getElementById('loginPass').value.trim();
-    if(u === USUARIO && p === PASSWORD){
-        localStorage.setItem('aureo_sesion', 'activa');
-        location.reload();
-    } else {
-        alert('Credenciales incorrectas');
+  window.onload = () => {
+    if(localStorage.getItem('aureo_sesion') === 'activa'){
+      document.getElementById('loginScreen').style.display='none';
+      document.getElementById('panel').style.display='block';
+      aplicarFiltros();  
     }
-}
-function logout(){
-    localStorage.removeItem('aureo_sesion');
-    location.reload();
-}
-function aplicarFiltros(){
-pedidos = JSON.parse(localStorage.getItem('aureo_pedidos')) || [];
-  const buscar=document.getElementById('buscarCliente').value.toLowerCase();
-  const montoMin=parseInt(document.getElementById('montoMin').value||'0');
-  let filtrados=[...pedidos].reverse().filter(p=>{
-    if(buscar&&!p.nombre.toLowerCase().includes(buscar)) return false;
-    if(filtroEstado!=='todos'&&p.estado!==filtroEstado) return false;
-    if(montoMin&&p.total<montoMin) return false;
-    if(!filtrarPorPeriodo(p)) return false;
-    return true;
-  });
-  document.getElementById('statTotal').textContent=filtrados.length;
-  document.getElementById('statMonto').textContent=formatPrice(filtrados.reduce((s,p)=>s+p.total,0));
-  document.getElementById('statEntregados').textContent=filtrados.filter(p=>p.estado==='entregado').length;
-  document.getElementById('statCancelados').textContent=filtrados.filter(p=>p.estado==='cancelado').length;
-  document.getElementById('resultadoCount').textContent=filtrados.length+' pedido'+(filtrados.length!==1?'s':'');
-  const lista=document.getElementById('historialList');
-  if(filtrados.length===0){ lista.innerHTML='<div class="empty">No hay pedidos con esos filtros</div>'; return; }
-  lista.innerHTML=filtrados.map(p=>`
-    <div class="pedido-card">
-      <div class="pedido-header" onclick="this.nextElementSibling.classList.toggle('open')">
-        <div>
-          <div class="pedido-num">#${p.id.slice(-4).toUpperCase()}</div>
-          <div class="pedido-nombre">${p.nombre}</div>
-          <div class="pedido-meta">${formatFecha(p.timestamp)} · ${formatHora(p.timestamp)}</div>
+  };
+
+  function login(){
+      const u = document.getElementById('loginUser').value.trim();
+      const p = document.getElementById('loginPass').value.trim();
+      if(u === USUARIO && p === PASSWORD){
+          localStorage.setItem('aureo_sesion', 'activa');
+          location.reload();
+      } else {
+          alert('Credenciales incorrectas');
+      }
+  }
+
+  function logout(){
+      localStorage.removeItem('aureo_sesion');
+      location.reload();
+  }
+
+  function aplicarFiltros(){
+    pedidos = JSON.parse(localStorage.getItem('aureo_pedidos')) || [];
+    const buscar = document.getElementById('buscarCliente').value.toLowerCase();
+    const montoMin = parseInt(document.getElementById('montoMin').value||'0');
+    
+    let filtrados = [...pedidos].reverse().filter(p => {
+      if(buscar && !p.nombre.toLowerCase().includes(buscar)) return false;
+      if(filtroEstado !== 'todos' && p.estado !== filtroEstado) return false;
+      if(montoMin && p.total < montoMin) return false;
+      if(!filtrarPorPeriodo(p)) return false;
+      return true;
+    });
+
+    document.getElementById('statTotal').textContent = filtrados.length;
+    document.getElementById('statMonto').textContent = formatPrice(filtrados.reduce((s,p) => s + p.total, 0));
+    document.getElementById('statEntregados').textContent = filtrados.filter(p => p.estado === 'entregado').length;
+    document.getElementById('statCancelados').textContent = filtrados.filter(p => p.estado === 'cancelado').length;
+    document.getElementById('resultadoCount').textContent = filtrados.length + ' pedido' + (filtrados.length !== 1 ? 's' : '');
+    
+    const lista = document.getElementById('historialList');
+    if(filtrados.length === 0){ lista.innerHTML = '<div class="empty">No hay pedidos con esos filtros</div>'; return; }
+    
+    lista.innerHTML = filtrados.map(p => `
+      <div class="pedido-card">
+        <div class="pedido-header" onclick="this.nextElementSibling.classList.toggle('open')">
+          <div>
+            <div class="pedido-num">#${p.id.slice(-4).toUpperCase()}</div>
+            <div class="pedido-nombre">${p.nombre}</div>
+            <div class="pedido-meta">${formatFecha(p.timestamp)} · ${formatHora(p.timestamp)}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="estado-badge estado-${p.estado}" style="margin-bottom:6px">${estadoLabel(p.estado)}</div>
+            <div style="font-family:'Playfair Display',serif;color:var(--gold);font-size:14px;font-weight:700">${formatPrice(p.total)}</div>
+          </div>
         </div>
-        <div style="text-align:right">
-          <div class="estado-badge estado-${p.estado}" style="margin-bottom:6px">${estadoLabel(p.estado)}</div>
-          <div style="font-family:'Playfair Display',serif;color:var(--gold);font-size:14px;font-weight:700">${formatPrice(p.total)}</div>
+        <div class="pedido-body">
+          <div class="pedido-info-row"><span>Dirección</span><span>${p.direccion}</span></div>
+          <div style="margin:8px 0">${Object.entries(p.items).map(([i,q]) => `<div class="pedido-item"><span>${q}x</span><span>${i}</span></div>`).join('')}</div>
+          <div class="pedido-total"><span>Total</span><span>${formatPrice(p.total)}</span></div>
         </div>
-      </div>
-      <div class="pedido-body">
-        <div class="pedido-info-row"><span>Dirección</span><span>${p.direccion}</span></div>
-        <div style="margin:8px 0">${Object.entries(p.items).map(([i,q])=>`<div class="pedido-item"><span>${q}x</span><span>${i}</span></div>`).join('')}</div>
-        <div class="pedido-total"><span>Total</span><span>${formatPrice(p.total)}</span></div>
-      </div>
-    </div>`).join('');
-}
-function exportarCSV(){
-  
-  const buscar=document.getElementById('buscarCliente').value.toLowerCase();
-  const montoMin=parseInt(document.getElementById('montoMin').value||'0');
-  let filtrados=[...pedidos].reverse().filter(p=>{
-    if(buscar&&!p.nombre.toLowerCase().includes(buscar)) return false;
-    if(filtroEstado!=='todos'&&p.estado!==filtroEstado) return false;
-    if(montoMin&&p.total<montoMin) return false;
-    if(!filtrarPorPeriodo(p)) return false;
+      </div>`).join('');
+  }
+
+  function exportarCSV(){
+    pedidos = JSON.parse(localStorage.getItem('aureo_pedidos') || '[]');
+    const buscar = document.getElementById('buscarCliente').value.toLowerCase();
+    const montoMin = parseInt(document.getElementById('montoMin').value||'0');
+    let filtrados = [...pedidos].reverse().filter(p => {
+      if(buscar && !p.nombre.toLowerCase().includes(buscar)) return false;
+      if(filtroEstado !== 'todos' && p.estado !== filtroEstado) return false;
+      if(montoMin && p.total < montoMin) return false;
+      if(!filtrarPorPeriodo(p)) return false;
+      return true;
+    });
+    
+    if(filtrados.length === 0){ mostrarToast('No hay pedidos para exportar'); return; }
+    const filas = [['#','Fecha','Hora','Cliente','Direccion','Productos','Total','Estado'], ...filtrados.map(p => [p.id.slice(-4).toUpperCase(), formatFecha(p.timestamp), formatHora(p.timestamp), p.nombre, p.direccion, Object.entries(p.items).map(([i,q]) => `${q}x ${i}`).join(' | '), p.total, estadoLabel(p.estado)])];
+    const csv = filas.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'AUREO_historial_'+new Date().toLocaleDateString('es-AR').replace(/\//g,'-')+'.csv';
+    a.click(); URL.revokeObjectURL(url);
+    mostrarToast('✦ CSV exportado');
+  }
+
+  function mostrarToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  function formatPrice(n){ return '$' + n.toLocaleString('es-AR'); }
+  function formatFecha(ts){ return new Date(ts).toLocaleDateString('es-AR'); }
+  function formatHora(ts){ return new Date(ts).toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'}); }
+  function estadoLabel(e){ return { nuevo:'Nuevo', preparando:'Preparando', entregado:'Entregado', cancelado:'Cancelado' }[e] || e; }
+
+  function filtrarPorPeriodo(p){
+    const fecha = new Date(p.timestamp);
+    const hoy = new Date();
+    if (filtroPeriodo === 'todos') return true;
+    if (filtroPeriodo === 'hoy') return fecha.toDateString() === hoy.toDateString();
+    if (filtroPeriodo === 'ayer') {
+      const ayer = new Date();
+      ayer.setDate(hoy.getDate() - 1);
+      return fecha.toDateString() === ayer.toDateString();
+    }
+    if (filtroPeriodo === 'semana') {
+      const inicioSemana = new Date();
+      inicioSemana.setDate(hoy.getDate() - 7);
+      return fecha >= inicioSemana;
+    }
+    if (filtroPeriodo === 'mes') {
+      return fecha.getMonth() === hoy.getMonth() && fecha.getFullYear() === hoy.getFullYear();
+    }
     return true;
-  });
-  if(filtrados.length===0){ mostrarToast('No hay pedidos para exportar'); return; }
-  const filas=[['#','Fecha','Hora','Cliente','Direccion','Productos','Total','Estado'],...filtrados.map(p=>[p.id.slice(-4).toUpperCase(),formatFecha(p.timestamp),formatHora(p.timestamp),p.nombre,p.direccion,Object.entries(p.items).map(([i,q])=>`${q}x ${i}`).join(' | '),p.total,estadoLabel(p.estado)])];
-  const csv=filas.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
-  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url; a.download='AUREO_historial_'+new Date().toLocaleDateString('es-AR').replace(/\//g,'-')+'.csv';
-  a.click(); URL.revokeObjectURL(url);
-  mostrarToast('✦ CSV exportado');
-}
-function mostrarToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  clearTimeout(t._timer); t._timer=setTimeout(()=>t.classList.remove('show'),2500);
-}
-function formatPrice(n){
-  return '$' + n.toLocaleString('es-AR');
-}
-
-function formatFecha(ts){
-  return new Date(ts).toLocaleDateString('es-AR');
-}
-
-function formatHora(ts){
-  return new Date(ts).toLocaleTimeString('es-AR',{
-    hour:'2-digit',
-    minute:'2-digit'
-  });
-}
-
-function estadoLabel(e){
-  return {
-    nuevo:'Nuevo',
-    preparando:'Preparando',
-    entregado:'Entregado',
-    cancelado:'Cancelado'
-  }[e] || e;
-}
-
-function filtrarPorPeriodo(p){
-  const fecha = new Date(p.timestamp);
-  const hoy = new Date();
-
-  if (filtroPeriodo === 'todos') return true;
-
-  if (filtroPeriodo === 'hoy') {
-    return fecha.toDateString() === hoy.toDateString();
   }
 
-  if (filtroPeriodo === 'ayer') {
-    const ayer = new Date();
-    ayer.setDate(hoy.getDate() - 1);
-    return fecha.toDateString() === ayer.toDateString();
+  function setPeriodo(periodo, boton){
+    filtroPeriodo = periodo;
+    document.querySelectorAll('.filtros-chips')[0].querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    boton.classList.add('active');
+    aplicarFiltros();
   }
 
-  if (filtroPeriodo === 'semana') {
-    const inicioSemana = new Date();
-    inicioSemana.setDate(hoy.getDate() - 7);
-    return fecha >= inicioSemana;
+  function setEstado(estado, boton){
+    filtroEstado = estado;
+    document.querySelectorAll('.filtros-chips')[1].querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    boton.classList.add('active');
+    aplicarFiltros();
   }
 
-  if (filtroPeriodo === 'mes') {
-    return fecha.getMonth() === hoy.getMonth() &&
-           fecha.getFullYear() === hoy.getFullYear();
-  }
-
-  return true;
-  }
-}
-
-function setPeriodo(periodo, boton){
-  filtroPeriodo = periodo;
-  aplicarFiltros();
-}
-
-function setEstado(estado, boton){
-  filtroEstado = estado;
-  aplicarFiltros();
-}
-
-function limpiarFiltros(){
-  document.getElementById('buscarCliente').value='';
-  document.getElementById('montoMin').value='';
-  filtroEstado='todos';
-  filtroPeriodo='todos';
-  aplicarFiltros();
+  function limpiarFiltros(){
+    document.getElementById('buscarCliente').value = '';
+    document.getElementById('montoMin').value = '';
+    filtroEstado = 'todos';
+    filtroPeriodo = 'todos';
+    // Resetear visualmente los chips
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.filtros-chips').forEach(box => box.children[0].classList.add('active'));
+    aplicarFiltros();
   }
 </script>
 </body>
