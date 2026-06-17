@@ -272,8 +272,35 @@ function estadoLabel(e){
   }[e] || e;
 }
 
-function filtrarPorPeriodo(){
+function filtrarPorPeriodo(p){
+  const fecha = new Date(p.timestamp);
+  const hoy = new Date();
+
+  if (filtroPeriodo === 'todos') return true;
+
+  if (filtroPeriodo === 'hoy') {
+    return fecha.toDateString() === hoy.toDateString();
+  }
+
+  if (filtroPeriodo === 'ayer') {
+    const ayer = new Date();
+    ayer.setDate(hoy.getDate() - 1);
+    return fecha.toDateString() === ayer.toDateString();
+  }
+
+  if (filtroPeriodo === 'semana') {
+    const inicioSemana = new Date();
+    inicioSemana.setDate(hoy.getDate() - 7);
+    return fecha >= inicioSemana;
+  }
+
+  if (filtroPeriodo === 'mes') {
+    return fecha.getMonth() === hoy.getMonth() &&
+           fecha.getFullYear() === hoy.getFullYear();
+  }
+
   return true;
+  }
 }
 
 function setPeriodo(periodo, boton){
