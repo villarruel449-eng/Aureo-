@@ -195,7 +195,11 @@ function logout(){
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('panel').style.display='none';
 }
-document.addEventListener('keydown', e=>{ if(e.key==='Enter') login(); });
+document.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){
+        login();
+    }
+});
 if(sessionStorage.getItem('aureo_admin_auth')==='1'){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('panel').style.display='block';
@@ -322,6 +326,13 @@ function mostrarToast(msg){
 }
 if(sessionStorage.getItem('aureo_admin_auth')==='1'){ iniciarEscucha(); }
 </script>
+  <script>
+window.addEventListener('firebaseReady', () => {
+  if(sessionStorage.getItem('aureo_admin_auth') === '1'){
+    iniciarEscucha();
+  }
+});
+  </script>
 </body>
   </html>
   
