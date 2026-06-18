@@ -5,21 +5,39 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AUREO — Central de Franquicias</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCwwYc6J3cKm0iAbtBfWFEjqaQGe9k0v8w",
+    authDomain: "aureo-app-3b6f8.firebaseapp.com",
+    projectId: "aureo-app-3b6f8",
+    storageBucket: "aureo-app-3b6f8.firebasestorage.app",
+    messagingSenderId: "432222510175",
+    appId: "1:432222510175:web:c2b5937ee0138c2df44fea"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  window.firebaseDB = db;
+  window.firebaseCollection = collection;
+  window.firebaseOnSnapshot = onSnapshot;
+  window.firebaseAddDoc = addDoc;
+  window.firebaseDoc = doc;
+  window.firebaseUpdateDoc = updateDoc;
+  window.firebaseQuery = query;
+  window.firebaseOrderBy = orderBy;
+  window.firebaseReady = true;
+  window.dispatchEvent(new Event('firebaseReady'));
+</script>
 <style>
   :root {
-    --gold: #D4AF37;
-    --gold-light: #F2D472;
-    --gold-dark: #A8882A;
-    --bg: #0A0A0A;
-    --bg3: #181818;
-    --surface: #141414;
-    --border: rgba(212,175,55,0.18);
-    --text: #F0EAD6;
-    --text-dim: #8A7A5A;
-    --green: #4CAF50;
-    --yellow: #FFC107;
-    --red: #F44336;
-    --blue: #2196F3;
+    --gold: #D4AF37; --gold-light: #F2D472; --gold-dark: #A8882A;
+    --bg: #0A0A0A; --bg3: #181818; --surface: #141414;
+    --border: rgba(212,175,55,0.18); --text: #F0EAD6; --text-dim: #8A7A5A;
+    --green: #4CAF50; --yellow: #FFC107; --red: #F44336; --blue: #2196F3;
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body { background:var(--bg); color:var(--text); font-family:'Montserrat',sans-serif; min-height:100vh; }
@@ -34,11 +52,16 @@
   .login-btn { width:100%; background:linear-gradient(135deg,var(--gold-dark),var(--gold),var(--gold-light)); color:#0A0A0A; border:none; border-radius:6px; padding:16px; font-family:'Playfair Display',serif; font-size:15px; font-weight:700; letter-spacing:3px; cursor:pointer; }
   .login-error { color:var(--red); font-size:11px; margin-top:8px; display:none; }
   header { position:sticky; top:0; z-index:100; background:rgba(10,10,10,0.95); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:14px 20px; display:flex; align-items:center; justify-content:space-between; }
-  .logo { font-family:'Playfair Display',serif; font-size:20px; font-weight:900; letter-spacing:5px; }
+  .logo { font-family:'Playfair Display',serif; font-size:18px; font-weight:900; letter-spacing:4px; }
   .logo span { color:var(--gold); }
-  .central-badge { background:var(--gold); color:#0A0A0A; padding:4px 10px; border-radius:20px; font-size:9px; font-weight:700; letter-spacing:2px; }
-  .logout-btn { background:none; border:1px solid rgba(255,80,80,0.3); color:rgba(255,100,100,0.7); padding:6px 12px; border-radius:4px; font-size:10px; cursor:pointer; }
+  .nav-links { display:flex; gap:8px; }
+  .nav-link { font-size:9px; color:var(--text-dim); text-decoration:none; letter-spacing:1px; padding:6px 10px; border:1px solid var(--border); border-radius:4px; }
+  .nav-link.active { color:var(--gold); border-color:var(--gold); }
+  .logout-btn { background:none; border:1px solid rgba(255,80,80,0.3); color:rgba(255,100,100,0.7); padding:6px 10px; border-radius:4px; font-size:9px; cursor:pointer; }
   main { max-width:600px; margin:0 auto; padding:20px 16px 100px; }
+  .conexion-pill { display:flex; align-items:center; gap:6px; font-size:10px; color:var(--text-dim); margin-bottom:16px; justify-content:center; }
+  .conexion-dot { width:8px; height:8px; border-radius:50%; background:var(--green); animation:pulse2 2s infinite; }
+  @keyframes pulse2 { 0%,100%{opacity:1} 50%{opacity:0.3} }
   .section-title { display:flex; align-items:center; gap:12px; margin:20px 0 12px; }
   .section-title span { font-size:9px; letter-spacing:4px; text-transform:uppercase; color:var(--gold); font-weight:600; white-space:nowrap; }
   .section-title::before,.section-title::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); }
@@ -65,14 +88,9 @@
   .info-row span:last-child { color:var(--text); font-weight:600; }
   .acciones { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
   .accion-btn { flex:1; min-width:90px; padding:9px 6px; border:none; border-radius:4px; font-family:'Montserrat',sans-serif; font-size:10px; font-weight:600; letter-spacing:1px; cursor:pointer; text-align:center; }
-  .btn-ver { background:rgba(33,150,243,0.15); color:var(--blue); border:1px solid rgba(33,150,243,0.3); }
   .btn-pausar { background:rgba(255,193,7,0.15); color:var(--yellow); border:1px solid rgba(255,193,7,0.3); }
   .btn-activar { background:rgba(76,175,80,0.15); color:var(--green); border:1px solid rgba(76,175,80,0.3); }
   .btn-editar { background:rgba(212,175,55,0.15); color:var(--gold); border:1px solid rgba(212,175,55,0.3); }
-  .pedido-mini { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:11px; }
-  .pedido-mini:last-child { border-bottom:none; }
-  .pedido-mini-nombre { color:var(--text); font-weight:600; }
-  .pedido-mini-monto { color:var(--gold); font-family:'Playfair Display',serif; }
   .btn-agregar { width:100%; background:none; border:1px dashed var(--gold); color:var(--gold); padding:14px; border-radius:8px; font-family:'Playfair Display',serif; font-size:14px; letter-spacing:3px; cursor:pointer; margin-top:8px; }
   .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:200; display:none; align-items:center; justify-content:center; }
   .modal-overlay.open { display:flex; }
@@ -84,17 +102,12 @@
   .modal-btns { display:flex; gap:10px; margin-top:8px; }
   .modal-btn-cancel { flex:1; background:none; border:1px solid var(--border); color:var(--text-dim); padding:12px; border-radius:4px; cursor:pointer; font-size:12px; }
   .modal-btn-save { flex:2; background:linear-gradient(135deg,var(--gold-dark),var(--gold)); color:#0A0A0A; border:none; border-radius:4px; padding:12px; font-family:'Playfair Display',serif; font-weight:700; font-size:13px; cursor:pointer; }
+  .empty { text-align:center; padding:30px; color:var(--text-dim); font-size:13px; }
   .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--bg3); border:1px solid var(--gold); color:var(--text); padding:10px 20px; border-radius:30px; font-size:12px; z-index:999; transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1); white-space:nowrap; }
   .toast.show { transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
-  <nav style="background-color: #1a1a1a; padding: 15px; display: flex; justify-content: space-around; border-bottom: 2px solid #D4AF37; position: sticky; top: 0;">
-    <a href="admin.html" style="color: #D4AF37; text-decoration: none; font-weight: bold; font-family: sans-serif;">ADMIN</a>
-    <a href="historial.html" style="color: #D4AF37; text-decoration: none; font-weight: bold; font-family: sans-serif;">HISTORIAL</a>
-    <a href="franquicias.html" style="color: #D4AF37; text-decoration: none; font-weight: bold; font-family: sans-serif;">FRANQUICIAS</a>
-</nav>
-
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">AURE<span>O</span></div>
@@ -105,14 +118,18 @@
     <div class="login-error" id="loginError">Usuario o contraseña incorrectos</div>
   </div>
 </div>
-
 <div id="panel" style="display:none">
   <header>
     <div class="logo">AURE<span>O</span></div>
-    <div class="central-badge">CENTRAL</div>
+    <div class="nav-links">
+      <a href="admin.html" class="nav-link">Panel</a>
+      <a href="historial.html" class="nav-link">Historial</a>
+      <a href="franquicias.html" class="nav-link active">Red</a>
+    </div>
     <button class="logout-btn" onclick="logout()">Salir</button>
   </header>
   <main>
+    <div class="conexion-pill"><span class="conexion-dot"></span> Conectado en tiempo real</div>
     <div class="section-title"><span>Red AUREO</span></div>
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-value" id="gTotalFranq">0</div><div class="stat-label">Franquicias</div></div>
@@ -121,11 +138,10 @@
       <div class="stat-card"><div class="stat-value" id="gFacturacion">$0</div><div class="stat-label">Facturación red</div></div>
     </div>
     <div class="section-title"><span>Franquicias</span></div>
-    <div id="franquiciasList"></div>
+    <div id="franquiciasList"><div class="empty">Cargando...</div></div>
     <button class="btn-agregar" onclick="abrirModal()">+ Agregar franquicia</button>
   </main>
 </div>
-
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <div class="modal-titulo">Nueva Franquicia</div>
@@ -133,120 +149,167 @@
     <input class="modal-input" id="fZona" placeholder="Zona (ej: La Matanza Norte)">
     <input class="modal-input" id="fEncargado" placeholder="Nombre del encargado">
     <input class="modal-input" id="fTelefono" placeholder="Teléfono WhatsApp">
-    <input class="modal-input" id="fWhatsapp" placeholder="Número WA pedidos (ej: 5491112345678)">
     <div class="modal-btns">
       <button class="modal-btn-cancel" onclick="cerrarModal()">Cancelar</button>
       <button class="modal-btn-save" onclick="guardarFranquicia()">GUARDAR</button>
     </div>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
 <script>
-  let franquicias = JSON.parse(localStorage.getItem('aureo_franquicias')) || [];
-const USUARIO = 'aureo', PASSWORD = 'admin2026';
-
-window.onload = () => {
-    if (localStorage.getItem('aureo_sesion') === 'activa') {
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('panel').style.display = 'block';
-        if (typeof renderTodo === 'function') renderTodo();
-    }
-};
+const USUARIO='aureo', PASSWORD='admin2026';
+let franquiciasCache=[];
+let pedidosCache=[];
+let unsubFranq=null, unsubPed=null;
 
 function login(){
-    const u = document.getElementById('loginUser').value.trim();
-    const p = document.getElementById('loginPass').value.trim();
-    if(u === USUARIO && p === PASSWORD){
-        localStorage.setItem('aureo_sesion', 'activa');
-        location.reload();
-    } else {
-        alert('Credenciales incorrectas');
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value.trim();
+  if(u===USUARIO&&p===PASSWORD){
+    sessionStorage.setItem('aureo_admin_auth','1');
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('panel').style.display='block';
+    iniciarEscucha();
+  } else { document.getElementById('loginError').style.display='block'; }
+}
+function logout(){
+  sessionStorage.removeItem('aureo_admin_auth');
+  if(unsubFranq) unsubFranq();
+  if(unsubPed) unsubPed();
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('panel').style.display='none';
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Enter') login(); });
+if(sessionStorage.getItem('aureo_admin_auth')==='1'){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('panel').style.display='block';
+}
+function formatPrice(n){ return '$'+(n||0).toLocaleString('es-AR'); }
+function formatFecha(ts){ return new Date(ts).toLocaleDateString('es-AR'); }
+
+function iniciarEscucha(){
+  if(!window.firebaseReady){ setTimeout(iniciarEscucha, 300); return; }
+
+  unsubFranq = window.firebaseOnSnapshot(
+    window.firebaseCollection(window.firebaseDB,'franquicias'),
+    (snapshot)=>{
+      franquiciasCache = snapshot.docs.map(d=>({ id:d.id, ...d.data() }));
+      renderTodo();
     }
+  );
+
+  const qPed = window.firebaseQuery(
+    window.firebaseCollection(window.firebaseDB,'pedidos'),
+    window.firebaseOrderBy('timestampMs','desc')
+  );
+  unsubPed = window.firebaseOnSnapshot(qPed, (snapshot)=>{
+    pedidosCache = snapshot.docs.map(d=>({ id:d.id, ...d.data() }));
+    renderTodo();
+  });
 }
 
-function logout(){
-    localStorage.removeItem('aureo_sesion');
-    location.reload();
-}
-function guardarFS(){ localStorage.setItem('aureo_franquicias',JSON.stringify(franquicias)); }
-function formatPrice(n){ return '$'+n.toLocaleString('es-AR'); }
-function formatFecha(ts){ return new Date(ts).toLocaleDateString('es-AR'); }
-function getPedidosFranquicia(id){ return JSON.parse(localStorage.getItem('aureo_pedidos_'+id)||'[]'); }
 function renderTodo(){
-  const activas=franquicias.filter(f=>f.estado==='activa').length;
-  let totalPedidos=0,totalFacturacion=0;
-  franquicias.forEach(f=>{ const p=getPedidosFranquicia(f.id); totalPedidos+=p.length; totalFacturacion+=p.reduce((s,x)=>s+x.total,0); });
-  document.getElementById('gTotalFranq').textContent=franquicias.length;
+  const activas=franquiciasCache.filter(f=>f.estado==='activa').length;
+  document.getElementById('gTotalFranq').textContent=franquiciasCache.length;
   document.getElementById('gActivas').textContent=activas;
-  document.getElementById('gPedidos').textContent=totalPedidos;
-  document.getElementById('gFacturacion').textContent=formatPrice(totalFacturacion);
+  document.getElementById('gPedidos').textContent=pedidosCache.length;
+  document.getElementById('gFacturacion').textContent=formatPrice(pedidosCache.reduce((s,p)=>s+(p.total||0),0));
+
   const lista=document.getElementById('franquiciasList');
-  if(franquicias.length===0){ lista.innerHTML='<div style="text-align:center;padding:30px;color:var(--text-dim);font-size:13px">No hay franquicias aún</div>'; return; }
-  lista.innerHTML=franquicias.map((f,i)=>{
-    const pedidos=getPedidosFranquicia(f.id);
+  if(franquiciasCache.length===0){ lista.innerHTML='<div class="empty">No hay franquicias aún</div>'; return; }
+
+  lista.innerHTML=franquiciasCache.map((f,i)=>{
     const hoy=new Date().toDateString();
-    const pedidosHoy=pedidos.filter(p=>new Date(p.timestamp).toDateString()===hoy);
-    const facturacion=pedidos.reduce((s,p)=>s+p.total,0);
-    const recientes=pedidos.slice(-3).reverse();
+    const pedidosHoy=pedidosCache.filter(p=>p.timestampMs && new Date(p.timestampMs).toDateString()===hoy);
+    const facturacion=pedidosCache.reduce((s,p)=>s+(p.total||0),0);
+
     return `
     <div class="franquicia-card">
-      <div class="franquicia-header" onclick="toggleFranq('fb${i}')">
+      <div class="franquicia-header" onclick="this.nextElementSibling.classList.toggle('open')">
         <div>
           <div class="franquicia-nombre">${f.nombre}</div>
           <div class="franquicia-zona">📍 ${f.zona}</div>
         </div>
         <div class="estado-pill ${f.estado}">${f.estado.toUpperCase()}</div>
       </div>
-      <div class="franquicia-body" id="fb${i}">
+      <div class="franquicia-body">
         <div class="mini-stats">
           <div class="mini-stat"><div class="mini-val">${pedidosHoy.length}</div><div class="mini-label">Hoy</div></div>
-          <div class="mini-stat"><div class="mini-val">${pedidos.length}</div><div class="mini-label">Total</div></div>
+          <div class="mini-stat"><div class="mini-val">${pedidosCache.length}</div><div class="mini-label">Red total</div></div>
           <div class="mini-stat"><div class="mini-val">${formatPrice(facturacion)}</div><div class="mini-label">Facturado</div></div>
         </div>
         <div style="margin-bottom:12px">
           <div class="info-row"><span>Encargado</span><span>${f.encargado}</span></div>
           <div class="info-row"><span>Teléfono</span><span>${f.telefono}</span></div>
-          <div class="info-row"><span>Alta</span><span>${formatFecha(f.creado)}</span></div>
-          <div class="info-row"><span>WhatsApp pedidos</span><span>+${f.whatsapp}</span></div>
+          <div class="info-row"><span>Alta</span><span>${f.creado?formatFecha(f.creado):''}</span></div>
         </div>
-        ${recientes.length>0?`<div style="font-size:9px;letter-spacing:2px;color:var(--gold);margin-bottom:8px">ÚLTIMOS PEDIDOS</div>${recientes.map(p=>`<div class="pedido-mini"><span class="pedido-mini-nombre">${p.nombre}</span><span class="pedido-mini-monto">${formatPrice(p.total)}</span></div>`).join('')}`:''}
         <div class="acciones">
-          <button class="accion-btn btn-ver" onclick="verPedidos('${f.id}','${f.nombre}')">Ver pedidos</button>
-          ${f.estado==='activa'?`<button class="accion-btn btn-pausar" onclick="cambiarEstadoF(${i},'pausada')">Pausar</button>`:`<button class="accion-btn btn-activar" onclick="cambiarEstadoF(${i},'activa')">Activar</button>`}
+          ${f.estado==='activa'
+            ?`<button class="accion-btn btn-pausar" onclick="cambiarEstadoF('${f.id}','pausada')">Pausar</button>`
+            :`<button class="accion-btn btn-activar" onclick="cambiarEstadoF('${f.id}','activa')">Activar</button>`
+          }
           <button class="accion-btn btn-editar" onclick="editarFranquicia(${i})">Editar</button>
         </div>
       </div>
     </div>`;
   }).join('');
 }
-function toggleFranq(id){ document.getElementById(id).classList.toggle('open'); }
-function cambiarEstadoF(i,estado){ franquicias[i].estado=estado; guardarFS(); renderTodo(); mostrarToast('Estado: '+estado); }
-function verPedidos(id,nombre){ const p=getPedidosFranquicia(id); if(p.length===0){ mostrarToast('No hay pedidos en '+nombre); return; } alert(`${nombre}\n\nTotal: ${p.length}\nFacturación: ${formatPrice(p.reduce((s,x)=>s+x.total,0))}`); }
-function editarFranquicia(i){ const f=franquicias[i]; document.getElementById('fNombre').value=f.nombre; document.getElementById('fZona').value=f.zona; document.getElementById('fEncargado').value=f.encargado; document.getElementById('fTelefono').value=f.telefono; document.getElementById('fWhatsapp').value=f.whatsapp; document.getElementById('modalOverlay').classList.add('open'); document.getElementById('modalOverlay').dataset.editIndex=i; }
-function abrirModal(){ ['fNombre','fZona','fEncargado','fTelefono','fWhatsapp'].forEach(id=>document.getElementById(id).value=''); delete document.getElementById('modalOverlay').dataset.editIndex; document.getElementById('modalOverlay').classList.add('open'); }
+
+async function cambiarEstadoF(id, estado){
+  try{
+    await window.firebaseUpdateDoc(window.firebaseDoc(window.firebaseDB,'franquicias',id), { estado });
+    mostrarToast('Estado actualizado: '+estado);
+  } catch(err){ console.error(err); mostrarToast('⚠ Error al actualizar'); }
+}
+
+let editIndex=null;
+function editarFranquicia(i){
+  const f=franquiciasCache[i];
+  document.getElementById('fNombre').value=f.nombre;
+  document.getElementById('fZona').value=f.zona;
+  document.getElementById('fEncargado').value=f.encargado;
+  document.getElementById('fTelefono').value=f.telefono;
+  editIndex=i;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function abrirModal(){
+  ['fNombre','fZona','fEncargado','fTelefono'].forEach(id=>document.getElementById(id).value='');
+  editIndex=null;
+  document.getElementById('modalOverlay').classList.add('open');
+}
 function cerrarModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
-function guardarFranquicia(){
+
+async function guardarFranquicia(){
   const nombre=document.getElementById('fNombre').value.trim();
   const zona=document.getElementById('fZona').value.trim();
   const encargado=document.getElementById('fEncargado').value.trim();
   const telefono=document.getElementById('fTelefono').value.trim();
-  const whatsapp=document.getElementById('fWhatsapp').value.trim();
   if(!nombre||!zona||!encargado){ mostrarToast('Completá todos los campos'); return; }
-  const idx=document.getElementById('modalOverlay').dataset.editIndex;
-  if(idx!==undefined){ franquicias[parseInt(idx)]={...franquicias[parseInt(idx)],nombre,zona,encargado,telefono,whatsapp}; mostrarToast('Franquicia actualizada'); }
-  else { franquicias.push({id:'f'+Date.now(),nombre,zona,encargado,telefono,whatsapp,estado:'activa',creado:Date.now()}); mostrarToast('✦ Franquicia agregada'); }
-  guardarFS(); cerrarModal(); renderTodo();
+
+  try{
+    if(editIndex!==null){
+      const f=franquiciasCache[editIndex];
+      await window.firebaseUpdateDoc(window.firebaseDoc(window.firebaseDB,'franquicias',f.id),{ nombre, zona, encargado, telefono });
+      mostrarToast('Franquicia actualizada');
+    } else {
+      await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB,'franquicias'),{
+        nombre, zona, encargado, telefono, estado:'activa', creado: Date.now()
+      });
+      mostrarToast('✦ Franquicia agregada');
+    }
+    cerrarModal();
+  } catch(err){ console.error(err); mostrarToast('⚠ Error al guardar'); }
 }
-function mostrarToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._timer); t._timer=setTimeout(()=>t.classList.remove('show'),2500); }
-if(franquicias.length===0){
-  franquicias=[
-    {id:'f001',nombre:'AUREO Matanza Norte',zona:'La Matanza Norte',encargado:'Carlos López',telefono:'11 2345-6789',whatsapp:'5491123456789',estado:'activa',creado:Date.now()-2592000000},
-    {id:'f002',nombre:'AUREO Matanza Sur',zona:'La Matanza Sur',encargado:'María García',telefono:'11 9876-5432',whatsapp:'5491198765432',estado:'activa',creado:Date.now()-1296000000},
-  ];
-  guardarFS();
+
+function mostrarToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),2500);
 }
+
+if(sessionStorage.getItem('aureo_admin_auth')==='1'){ iniciarEscucha(); }
 </script>
 </body>
-</html>                                                                                                                </html>
-        
+  </html>
+                                   
