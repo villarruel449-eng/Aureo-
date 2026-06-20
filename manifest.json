@@ -1,22 +1,38 @@
 {
+  "id": "/Aureo-/",
   "name": "AUREO Premium Delivery",
   "short_name": "AUREO",
-  "start_url": "index.html",
+  "description": "AUREO – Delivery Premium. Disfrutá de nuestra variedad de burgers, pizzas y donuts con la máxima calidad directo a tu casa.",
+  "start_url": "/Aureo-/index.html",
+  "scope": "/Aureo-/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
   "background_color": "#0A0A0A",
   "theme_color": "#D4AF37",
-  "orientation": "portrait",
+  "lang": "es-AR",
+  "dir": "ltr",
+  "categories": ["food", "shopping", "lifestyle"],
   "icons": [
+    { "src": "icons/icon-72.png", "sizes": "72x72", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-96.png", "sizes": "96x96", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-128.png", "sizes": "128x128", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-144.png", "sizes": "144x144", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-152.png", "sizes": "152x152", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-384.png", "sizes": "384x384", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
     {
-      "src": "1780170227930.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "1780170227930.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "name": "Hacer un pedido",
+      "short_name": "Pedido",
+      "description": "Ir directo a la app de pedidos",
+      "url": "/Aureo-/index.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
     }
   ],
-  "description": "AUREO – Delivery Premium. Disfrutá de nuestra variedad de burgers, pizzas y donuts con la máxima calidad directo a tu casa."
+  "prefer_related_applications": false
 }
