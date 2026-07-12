@@ -1,0 +1,10 @@
+// delivery.html
+function iniciarSeguimientoRepartidor(pedidoId) {
+    navigator.geolocation.watchPosition((pos) => {
+        const { latitude, longitude } = pos.coords;
+        db.collection("pedidos").doc(pedidoId).update({
+            deliveryLat: latitude,
+            deliveryLng: longitude
+        });
+    }, null, { enableHighAccuracy: true });
+}
