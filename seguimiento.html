@@ -1,0 +1,21 @@
+<!-- seguimiento.html -->
+<div id="map"></div>
+<div id="eta-display">Calculando llegada...</div>
+
+<script>
+    // ... inicialización de Firebase ...
+    const coordenadasCliente = { lat: -34.7, lng: -58.6 }; // Ubicación real del cliente
+
+    db.collection("pedidos").doc(pedidoId).onSnapshot((doc) => {
+        const data = doc.data();
+        const posRepartidor = { lat: data.deliveryLat, lng: data.deliveryLng };
+
+        if (!markerDelivery) { initMap(posRepartidor.lat, posRepartidor.lng); }
+        markerDelivery.setPosition(posRepartidor);
+
+        // Llamada a nuestra lógica gratuita
+        calcularETA(posRepartidor.lat, posRepartidor.lng, coordenadasCliente.lat, coordenadasCliente.lng, (minutos, km) => {
+            document.getElementById("eta-display").innerText = `Llegada estimada: ${minutos} min (${km} km)`;
+        });
+    });
+</script>
